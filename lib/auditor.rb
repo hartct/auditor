@@ -1,0 +1,29 @@
+module Auditor
+  require 'engine' if defined?(Rails) && Rails::VERSION::MAJOR == 3
+  require 'application_controller'
+end
+
+module ActionController
+	module Auditor
+		def self.included(base)
+			base.extend(ClassMethods)
+		end
+    
+		module ClassMethods
+			def is_audited
+				include ActionController::Auditor::InstanceMethods
+				before_filter :audit_request
+			end
+		end
+
+		module InstanceMethods
+			def audit_request
+				a = ::Auditor::AuditorLog.new
+				a.save!
+				logger.debug "From auditor engine, auditing the reuqest"
+			end
+		end
+	end
+end
+
+ActionController::Base.send(:include, ActionController::Auditor)
