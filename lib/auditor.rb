@@ -19,8 +19,11 @@ module ActionController
 		module InstanceMethods
 			def audit_request
 				a = ::Auditor::AuditorLog.new
+				a.request_uri = request.url
+				a.request_parameters = request.filtered_parameters.inspect
+				a.remote_address = request.remote_ip
+				a.user_id = ::Auditor::Engine::config.user_id.call(request)
 				a.save!
-				logger.debug "From auditor engine, auditing the reuqest"
 			end
 		end
 	end
